@@ -18,12 +18,19 @@ export const Lista = () => {
         }
     }
 
+    const borrarTarea = (indexParaEliminar) => (
+        setListaDeTareas(listaDeTareas.filter((tarea, indiceActual) => {
+            return indiceActual !== indexParaEliminar
+        })),
+        setContadorDeTareas(contadorDeTareas - 1)
+    )
+
     return (
         <>
             <h4 className="text-center" style={{ fontSize: "100px" }}>Tareas</h4>
             <div className="border shadow">
                 <input
-                    style={{textSize: "20px"}}
+                    style={{ fontSize: "20px" }}
                     type="text"
                     className="form-control p-3 ps-5 rounded-0 border-0 border-bottom"
                     placeholder="Introduzca una nueva tarea"
@@ -32,9 +39,16 @@ export const Lista = () => {
                     value={myValue}
                 />
 
-                {listaDeTareas.map((tarea) => (
-
-                    <div className="p-3 ps-5 border-bottom" style={{fontSize: "20px"}}>{tarea}</div>
+                {listaDeTareas.map((tarea, index) => (
+                    <div key={index} className="tarea-container d-flex justify-content-between p-3 ps-5 border-bottom">
+                        <div className="d-flex align-items-center" style={{ fontSize: "20px" }}>{tarea}</div>
+                        <button
+                            className="borrar-boton btn bg-transparent text-danger border-0"
+                            onClick={() => borrarTarea(index)}
+                            style={{ fontSize: "20px", padding: "0px" }}>
+                            <i className="bi bi-x"></i>
+                        </button>
+                    </div>
                 ))}
 
                 <p
