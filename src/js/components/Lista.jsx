@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Tarea } from "./Tarea"
+import { useEffect, useState } from "react";
 
 export const Lista = () => {
 
@@ -7,20 +6,72 @@ export const Lista = () => {
     const [listaDeTareas, setListaDeTareas] = useState([])
     const [contadorDeTareas, setContadorDeTareas] = useState(0)
 
+    const getTareas = async () => {
+        const response = await fetch("https://playground.4geeks.com/todo/users/mariogr12")
+
+        if (!response.ok) {
+            crarUsuario()
+            return
+        }
+
+        const data = await response.json()
+
+        setListaDeTareas(data.todos)
+        setContadorDeTareas(data.todos.length)
+    }
+
+    const crarUsuario = async () => {
+        await fetch("https://playground.4geeks.com/todo/users/mariogr12", {
+            method: "POST"
+        })
+    }
+
+    const borrarTarea = async (id) => {
+        await fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
+            method: "DELETE",
+        })
+        getTareas()
+        
+    }
+
+    const borrarTodasTareas = async () => {
+        await fetch("https://playground.4geeks.com/todo/users/mariogr12", {
+            method: "DELETE"
+        })
+
+        await crarUsuario()
+        await getTareas()
+    }
+
+    const crearTarea = async () => {
+        const nuevaTarea = {
+            label: myValue,
+            done: false
+        };
+
+        await fetch("https://playground.4geeks.com/todo/todos/mariogr12", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(nuevaTarea)
+        })
+
+        getTareas()
+    }
+
+    useEffect(() => {
+        getTareas()
+    }, [])
+
+
     const anadirNuevaTarea = (event) => {
         if (event.code === "Enter") {
-            setListaDeTareas((prev) => [...prev, myValue])
+            crearTarea()
             setContadorDeTareas(contadorDeTareas + 1)
             setMyValue("")
         }
     }
-
-    const borrarTarea = (indexParaEliminar) => (
-        setListaDeTareas(listaDeTareas.filter((tarea, indiceActual) => {
-            return indiceActual !== indexParaEliminar
-        })),
-        setContadorDeTareas(contadorDeTareas - 1)
-    )
 
     return (
         <>
@@ -67,25 +118,28 @@ export const Lista = () => {
 
                     {listaDeTareas.map((tarea, index) => (
                         <div key={index} className="tarea-container d-flex justify-content-between p-3 ps-5 border-bottom">
-                            <div className="d-flex align-items-center" style={{ fontSize: "20px", fontFamily: "Comic Relief"}}>{tarea}</div>
+                            <div className="d-flex align-items-center" style={{ fontSize: "20px", fontFamily: "Comic Relief" }}>{tarea.label}</div>
                             <button
                                 className="borrar-boton btn bg-transparent text-danger border-0"
-                                onClick={() => borrarTarea(index)}
+                                onClick={() => borrarTarea(tarea.id)}
                                 style={{ fontSize: "20px", padding: "0px" }}>
                                 <i className="bi bi-x"></i>
                             </button>
                         </div>
                     ))}
 
-                    <p
-                        className="ps-3 py-2 m-0"
-                        style={{ fontSize: "12px", color: "grey", fontFamily: "Comic Relief" }}
-                    >{contadorDeTareas === 0
-                        ? 'No hay ninguna tarea, añade una ahora'
-                        : contadorDeTareas === 1
-                            ? "Queda 1 tarea"
-                            : `Quedan ${contadorDeTareas} tareas `}
-                    </p>
+                    <div className="d-flex justify-content-between">
+                        <p
+                            className="d-flex align-items-center ps-3 py-2 m-0"
+                            style={{ fontSize: "12px", color: "grey", fontFamily: "Comic Relief" }}
+                        >{contadorDeTareas === 0
+                            ? 'No hay ninguna tarea, añade una ahora'
+                            : contadorDeTareas === 1
+                                ? "Queda 1 tarea"
+                                : `Quedan ${contadorDeTareas} tareas `}
+                        </p>
+                        <button className="btn bg-transparent text-danger " onClick={() => { borrarTodasTareas() }}>Borrar Todo</button>
+                    </div>
                 </div>
             </div>
         </>
